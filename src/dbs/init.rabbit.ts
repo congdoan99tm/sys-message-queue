@@ -49,6 +49,6 @@ const runConsumer = async () => {
     console.error(error);
   }
 };
-runConsumer().catch(console.error());
+runConsumer().catch(console.error);
 
 export default { connectToRabbitMQ, connectToRabbitMQForTest };

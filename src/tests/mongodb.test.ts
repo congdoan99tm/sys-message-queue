@@ -1,19 +1,18 @@
 'use strict';
 
-const mongoose = require('mongoose');
-const connectString = `mongodb://localhost:27107/shopDEV`;
+import mongoose, { Connection } from 'mongoose';
+const connectString = `mongodb://localhost:27017/shopDEV`;
 
 const TestSchema = new mongoose.Schema({ name: String });
 const Test = mongoose.model('Test', TestSchema);
 
 describe('Mongoose Connection', () => {
-  let connection;
   beforeAll(async () => {
-    connection = await mongoose.connect(connectString);
+    await mongoose.connect(connectString);
   });
 
   afterAll(async () => {
-    await connection.close();
+    await mongoose.connection.close();
   });
 
   it('should connect to mongoose', () => {
@@ -28,7 +27,7 @@ describe('Mongoose Connection', () => {
 
   it('should find a document to the database', async () => {
     const user = await Test.findOne({ name: 'AnonStick' });
-    expect(user).toBeDefined()
+    expect(user).toBeDefined();
     expect(user.name).toBe('AnonStick');
   });
 });
