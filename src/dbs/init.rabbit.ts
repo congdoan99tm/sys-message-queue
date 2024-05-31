@@ -1,44 +1,50 @@
 import amqp from 'amqplib';
 
-const connectToRabbitMQ = async () => {
+interface RabbitMQConnection {
+  channel: amqp.Channel;
+  connection: amqp.Connection;
+}
+
+const connectToRabbitMQ = async (): Promise<RabbitMQConnection> => {
   try {
     const connection = await amqp.connect('amqp://guest:guest@localhost');
-    if (!connection) throw new Error(' Connection net established');
+    if (!connection) throw new Error('Connection not established');
 
     const channel = await connection.createChannel();
     return { channel, connection };
-  } catch (error) {}
+  } catch (error) {
+    throw error; // Re-throw the error for better handling
+  }
 };
 
-const connectToRabbitMQForTest = async () => {
+const connectToRabbitMQForTest = async (): Promise<void> => {
   try {
     const { channel, connection } = await connectToRabbitMQ();
 
-    //Publish message to a queue
+    // Publish message to a queue
     const queue = 'test-queue';
     const message = 'Hello, shopDev by Doan';
     await channel.assertQueue(queue);
     await channel.sendToQueue(queue, Buffer.from(message));
 
-    //close the connection
+    // Close the connection
     await connection.close();
   } catch (error) {
-    // console.error(`Error connecting to RabbitMQ ${error}`);
-    throw error;
+    throw error; // Re-throw the error for better handling
   }
 };
-const runConsumer = async () => {
+
+const runConsumer = async (): Promise<void> => {
   try {
     const connection = await amqp.connect('amqp://guest:guest@localhost');
     const channel = await connection.createChannel();
     const queueName = 'test-topic';
-    await channel.assertQueue(queueName, {
-      durable: true,
-    });
-    // listen messages from producer channel
+    await channel.assertQueue(queueName, { durable: true });
+
+    // Listen messages from producer channel
     channel.consume(
       queueName,
-      (message) => {
+      (message: amqp.Message): void => {
         console.log(`Received ${message.content.toString()}`);
       },
       {
@@ -49,6 +55,7 @@ const runConsumer = async () => {
     console.error(error);
   }
 };
+
 runConsumer().catch(console.error);
 
 export default { connectToRabbitMQ, connectToRabbitMQForTest };

@@ -1,6 +1,6 @@
 'use strict';
 
-import mongoose, { Connection } from 'mongoose';
+import mongoose from 'mongoose';
 const connectString = `mongodb://localhost:27017/shopDEV`;
 
 const TestSchema = new mongoose.Schema({ name: String });
