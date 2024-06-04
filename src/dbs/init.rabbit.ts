@@ -1,4 +1,4 @@
-import amqp from 'amqplib';
+import * as amqp from 'amqplib';
 
 interface RabbitMQConnection {
   channel: amqp.Channel;
@@ -56,6 +56,25 @@ const runConsumer = async (): Promise<void> => {
   }
 };
 
-runConsumer().catch(console.error);
+// runConsumer().catch(console.error);
 
-export default { connectToRabbitMQ, connectToRabbitMQForTest };
+const consumerQueue = async (channel: amqp.Channel, queueName: string) => {
+  try {
+    await channel.assertQueue(queueName, { durable: true });
+    console.log(`Waiting for message...`);
+    channel.consume(
+      queueName,
+      (msg: amqp.Message) => {
+        console.log(`Received message: ${queueName}::`, msg.content.toString());
+      },
+      {
+        noAck: true,
+      }
+    );
+  } catch (error) {
+    console.error(`error publish message to rabbitMQ::${error}`);
+    throw error;
+  }
+};
+
+export default { connectToRabbitMQ, connectToRabbitMQForTest, consumerQueue };
