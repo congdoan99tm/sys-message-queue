@@ -1,4 +1,4 @@
-import * as amqp from 'amqplib';
+import amqp, { Connection } from 'amqplib';
 
 interface RabbitMQConnection {
   channel: amqp.Channel;
@@ -7,12 +7,13 @@ interface RabbitMQConnection {
 
 const connectToRabbitMQ = async (): Promise<RabbitMQConnection> => {
   try {
-    const connection = await amqp.connect('amqp://guest:guest@localhost');
+    const connection = await amqp.connect('amqp://guest:guest@localhost:5672');
     if (!connection) throw new Error('Connection not established');
 
     const channel = await connection.createChannel();
     return { channel, connection };
   } catch (error) {
+    console.error(`connectToRabbitMQ::${error}`);
     throw error; // Re-throw the error for better handling
   }
 };
@@ -30,6 +31,8 @@ const connectToRabbitMQForTest = async (): Promise<void> => {
     // Close the connection
     await connection.close();
   } catch (error) {
+    console.error(`connectToRabbitMQForTest::${error}`);
+
     throw error; // Re-throw the error for better handling
   }
 };
